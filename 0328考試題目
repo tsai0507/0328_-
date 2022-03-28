@@ -1,0 +1,107 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+using namespace std;
+
+class Gint {
+private:
+	string snum;
+	int num;
+public:
+	Gint(){}
+	Gint(const string& sno) :snum(sno) {
+		num = snum2num(snum);
+	}
+  
+        int nums[4];
+        int i=0;
+
+	int get_num() const { return num; }
+	string get_snum() const { return snum; }
+	int snum2num(const string& sno) const;
+	
+	friend istream& operator>>(istream& in, Gint& foo);
+
+};
+
+int Gint::snum2num(const string& sno) const {
+	//cout << sno << endl;
+	int a;
+	istringstream  STR;
+	string::size_type id0x = sno.find("0x"), id0o = sno.find("0o"), id0b = sno.find("0b");
+	STR.str(sno);
+	if (id0x != string::npos) {
+		//cout << "yes";
+		STR >> hex >> a;
+	}
+	else if(id0o != string::npos) {
+		STR.ignore(2, EOF);
+		STR >> oct >> a;
+	}
+	
+	else if (id0b != string::npos) {
+		STR.ignore(2, EOF);
+		STR >> a;
+	
+		int TEMP,two=1,value=0,mod,dev;
+		while (a > 0) {
+			TEMP = a;
+			dev = TEMP / 10;
+			mod = TEMP % 10;
+			value += mod * two;
+			two *= 2;
+			a /= 10;
+		}
+		a = value;
+	}
+
+	else STR >> a;
+
+	
+	return a;
+}
+istream& operator>>(istream& in, Gint& foo) {
+	string temp;
+	in >> temp;
+	foo.num=foo.snum2num(temp);
+	if(foo.i<4){
+	  foo.nums[foo.i]=foo.num;
+	foo.i+=1;
+	}
+	else foo.i=0;
+	return  in;
+}
+
+int main() {
+ 
+	ifstream infile("gint.dat");
+	int sum;
+	Gint foo;
+	string line;
+	istringstream istr;
+
+	while (getline(infile, line)) {
+		istr.str(line);
+		sum = 0;
+		while (istr >> foo) {
+			//cout << foo.get_num() << endl;
+			sum = sum + foo.get_num();
+			//cout << "sum" << sum << endl;
+		}
+		istr.clear();
+		cout << "sum of " << line ;
+		
+		cout<< " = ";
+		//for(int a:foo.nums) cout<<a<<" + ";
+		cout<<foo.nums[0];
+		for(int g=1;g<4;++g) cout<<" + "<<foo.nums[g];
+
+		
+		
+		cout<<"="<<sum<<endl;
+	}
+
+	
+	return 0;
+}
